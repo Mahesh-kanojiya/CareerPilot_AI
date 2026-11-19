@@ -1,0 +1,36 @@
+{
+  "parser_test_cases": [
+    {
+      "id": "tc-001",
+      "text": "Full-stack developer experienced in Python, FastAPI, React, PostgreSQL, Docker, and AWS.",
+      "ground_truth_skills": ["python", "fastapi", "react", "postgresql", "docker", "aws"]
+    },
+    {
+      "id": "tc-002",
+      "text": "Machine learning engineer skilled in PyTorch, LangChain, RAG, Vector Search, and Python.",
+      "ground_truth_skills": ["pytorch", "langchain", "rag", "vector search", "python"]
+    },
+    {
+      "id": "tc-003",
+      "text": "Frontend engineer with deep knowledge of TypeScript, Next.js, Tailwind CSS, HTML, and CSS.",
+      "ground_truth_skills": ["typescript", "next.js", "tailwind css", "html", "css"]
+    }
+  ],
+  "recommendation_test_cases": [
+    {
+      "candidate_title": "AI / ML Specialist",
+      "skills": ["Python", "PyTorch", "LangChain", "RAG", "FastAPI", "Vector Search"],
+      "expected_best_match_id": "curated-002"
+    },
+    {
+      "candidate_title": "Frontend React Specialist",
+      "skills": ["React", "Next.js", "TypeScript", "Tailwind CSS", "Redux"],
+      "expected_best_match_id": "curated-004"
+    },
+    {
+      "candidate_title": "Backend Python Developer",
+      "skills": ["Python", "FastAPI", "PostgreSQL", "Redis", "Microservices"],
+      "expected_best_match_id": "curated-003"
+    }
+  ]
+}
