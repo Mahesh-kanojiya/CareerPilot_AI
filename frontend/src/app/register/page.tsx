@@ -27,9 +27,16 @@ export default function RegisterPage() {
       });
       router.push("/dashboard");
     } catch (err: any) {
-      setError(
-        err.response?.data?.detail || "Registration failed. Please check your details."
-      );
+      const detail = err.response?.data?.detail;
+      if (typeof detail === "string") {
+        setError(detail);
+      } else if (Array.isArray(detail) && detail.length > 0) {
+        setError(detail[0]?.msg || "Validation error");
+      } else if (err.message) {
+        setError(`Error: ${err.message}`);
+      } else {
+        setError("Registration failed. Please check your details.");
+      }
     } finally {
       setLoading(false);
     }

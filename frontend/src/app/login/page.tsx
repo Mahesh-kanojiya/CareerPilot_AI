@@ -22,9 +22,14 @@ export default function LoginPage() {
       await api.login({ email, password });
       router.push("/dashboard");
     } catch (err: any) {
-      setError(
-        err.response?.data?.detail || "Invalid email or password. Please try again."
-      );
+      const detail = err.response?.data?.detail;
+      if (typeof detail === "string") {
+        setError(detail);
+      } else if (err.message) {
+        setError(`Error: ${err.message}`);
+      } else {
+        setError("Invalid email or password. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
