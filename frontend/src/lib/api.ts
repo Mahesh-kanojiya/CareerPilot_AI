@@ -11,8 +11,12 @@ import {
   ChatMessage
 } from "./types";
 
-// Ensure API_BASE_URL cleanly points to /api/v1 regardless of whether the env var includes it or has trailing slashes
-let rawBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+// Default to deployed Render backend in production/Vercel, localhost in local development
+let rawBaseUrl =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (typeof window !== "undefined" && window.location.hostname === "localhost"
+    ? "http://localhost:8000/api/v1"
+    : "https://careerpilot-ai-cn1r.onrender.com/api/v1");
 rawBaseUrl = rawBaseUrl.replace(/\/+$/, "");
 if (!rawBaseUrl.endsWith("/api/v1")) {
   rawBaseUrl = `${rawBaseUrl}/api/v1`;
