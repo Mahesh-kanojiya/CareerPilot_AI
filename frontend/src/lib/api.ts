@@ -11,7 +11,13 @@ import {
   ChatMessage
 } from "./types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+// Ensure API_BASE_URL cleanly points to /api/v1 regardless of whether the env var includes it or has trailing slashes
+let rawBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+rawBaseUrl = rawBaseUrl.replace(/\/+$/, "");
+if (!rawBaseUrl.endsWith("/api/v1")) {
+  rawBaseUrl = `${rawBaseUrl}/api/v1`;
+}
+const API_BASE_URL = rawBaseUrl;
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
