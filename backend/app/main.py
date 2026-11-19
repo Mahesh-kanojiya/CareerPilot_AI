@@ -1,19 +1,30 @@
 import os
+import traceback
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 from app.core.config import settings
 import app.models  # Ensure all SQLAlchemy models are registered
 from app.core.database import engine, Base, SessionLocal
 from app.api.v1.router import api_router
 from app.services.job_fetcher import JobFetcherService
 from app.models.job import Job
+from app.models.user import User
 
 # Lifespan context manager for startup and shutdown
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: Ensure database tables are created
     try:
+        if not settings.DATABASE_URL.startswith("sqlite"):
+            try:
+                with engine.connect() as conn:
+                    conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+                    conn.commit()
+            except Exception as ext_err:
+                print(f"[CareerPilot AI] Vector extension notice: {ext_err}")
         Base.metadata.create_all(bind=engine)
         print("[CareerPilot AI] Database tables verified.")
     except Exception as e:
@@ -31,6 +42,15 @@ app = FastAPI(
     redoc_url="/redoc",
     lifespan=lifespan
 )
+
+# Global 500 error handler so debugging is transparent
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    traceback.print_exc()
+    return JSONResponse(
+        status_code=500,
+        content={"detail": str(exc), "type": type(exc).__name__}
+    )
 
 # CORS Configuration
 origins = [
@@ -67,4 +87,19 @@ def root():
 
 @app.get("/health", tags=["Health"])
 def health_check():
-    return {"status": "healthy", "database": "connected"}
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        db = SessionLocal()
+        try:
+            Base.metadata.create_all(bind=engine)
+            user_count = db.query(User).count()
+            return {"status": "healthy", "database": "connected", "users_count": user_count}
+        finally:
+            db.close()
+    except Exception as e:
+        traceback.print_exc()
+        return JSONResponse(
+            status_code=500,
+            content={"status": "unhealthy", "error": str(e), "type": type(e).__name__}
+        )
